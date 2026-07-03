@@ -1079,16 +1079,16 @@ function renderDashboard() {
   <div class="grid-3 mb-16">
     <div class="stat-box">
       <span class="stat-label">⚖️ Peso</span>
-      <input type="number" step="0.1" placeholder="kg" value="${day.weight || ''}"
+      <input type="text" inputmode="decimal" placeholder="es. 74.5" value="${day.weight || ''}"
         style="font-size:1.4rem;font-weight:700;background:transparent;border:none;color:var(--accent2);padding:0;width:100%"
-        onchange="setDayField('weight', this.value)">
-      <span class="stat-sub">Obiettivo: 70 kg</span>
+        onblur="setPeso(this.value)">
+      <span class="stat-sub">${day.weight && parseFloat(day.weight) <= 70 ? '🎉 Obiettivo raggiunto!' : 'Obiettivo: 70 kg'}</span>
     </div>
     <div class="stat-box">
-      <span class="stat-label">👟 Passi</span>
-      <input type="number" placeholder="0" value="${day.steps || ''}"
+      <span class="stat-label">💟 Passi</span>
+      <input type="text" inputmode="numeric" placeholder="es. 8500" value="${day.steps || ''}"
         style="font-size:1.4rem;font-weight:700;background:transparent;border:none;color:var(--accent);padding:0;width:100%"
-        onchange="setDayField('steps', this.value)">
+        onblur="setDayField('steps', this.value)">
       <span class="stat-sub">Obiettivo: 8.000-10.000</span>
     </div>
     <div class="stat-box">
@@ -1207,12 +1207,28 @@ function renderDashboard() {
     </div>
   </div>
 
-  <!-- GIORNATA COMPLETATA -->
+  <!-- AZIONI FONDO -->
   <div class="btn-row">
-    <button class="btn ${day.completed ? 'btn-success' : 'btn-primary'}" onclick="toggleCompleted()">
-      ${day.completed ? '✅ Giornata completata!' : '🎯 Segna giornata completata'}
+    <button class="btn btn-primary" onclick="saveDayManual()">
+      💾 Salva aggiornamenti
+    </button>
+    <button class="btn ${day.completed ? 'btn-success' : 'btn-ghost'}" onclick="toggleCompleted()">
+      ${day.completed ? '✅ Giornata completata' : '🎯 Segna come completata'}
     </button>
   </div>`;
+}
+
+function setPeso(val) {
+  const day = ensureDay();
+  day.weight = val;
+  saveData();
+  const p = parseFloat(val);
+  if (!isNaN(p) && p <= 70) {
+    showToast('🎉 Obiettivo 70 kg raggiunto! Complimenti!');
+    // Aggiorna la sub-label senza re-render completo
+    const labels = document.querySelectorAll('.stat-sub');
+    if (labels[0]) labels[0].textContent = '🎉 Obiettivo raggiunto!';
+  }
 }
 
 function addSkinExtraMatt() {
