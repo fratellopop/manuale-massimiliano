@@ -2009,12 +2009,7 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init);
 
-// ============================================================
-// SERVICE WORKER REGISTRATION
-// ============================================================
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
+// Service worker rimosso per evitare problemi di cache
 </script>
 </body>
 </html>
