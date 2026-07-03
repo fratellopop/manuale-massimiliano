@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manuale personale di Massimiliano</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Manuale Max">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --card: #1e2535;
+    --card2: #252d3f;
+    --border: #2e3a52;
+    --accent: #4f8ef7;
+    --accent2: #6ee7b7;
+    --accent3: #f472b6;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --transition: 0.2s ease;
+    --sidebar-w: 220px;
+  }
+  html { font-size: 15px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ===== LAYOUT ===== */
+  #app { display: flex; flex: 1; min-height: 100vh; }
+
+  /* ===== SIDEBAR ===== */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: transform var(--transition);
+    overflow-y: auto;
+  }
+  #sidebar-logo {
+    padding: 22px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  #sidebar-logo h1 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+  #sidebar-logo p {
+    font-size: 0.72rem;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+  #sidebar-date {
+    padding: 10px 20px;
+    font-size: 0.75rem;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+  #sidebar nav { flex: 1; padding: 10px 0; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 0;
+    font-size: 0.85rem;
+    color: var(--text2);
+    transition: background var(--transition), color var(--transition);
+    border-left: 3px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active {
+    background: rgba(79,142,247,0.12);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+  .nav-item .icon { font-size: 1.1rem; width: 22px; text-align: center; }
+  #sidebar-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #sidebar-footer button {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text2);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  #sidebar-footer button:hover { background: var(--card2); color: var(--text); }
+
+  /* ===== MAIN ===== */
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  #topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  #topbar h2 { font-size: 1.05rem; font-weight: 600; color: var(--text); }
+  #topbar .topbar-right { display: flex; gap: 10px; align-items: center; }
+  #hamburger {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 4px;
+  }
+  #content { padding: 28px; flex: 1; max-width: 1100px; }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  /* ===== SECTION HEADER ===== */
+  .section-header {
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header p { font-size: 0.85rem; color: var(--text2); margin-top: 5px; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all var(--transition);
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3a7de0; }
+  .btn-success { background: var(--accent2); color: #0f1117; }
+  .btn-success:hover { background: #4dd4a0; }
+  .btn-warn { background: var(--warn); color: #0f1117; }
+  .btn-warn:hover { background: #d97706; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-ghost {
+    background: var(--bg3);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--card2); color: var(--text); }
+  .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* ===== CHECKLIST ===== */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg3);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background var(--transition);
+    user-select: none;
+  }
+  .check-item:hover { background: var(--card2); }
+  .check-item.checked {
+    background: rgba(110,231,183,0.08);
+    border-color: rgba(110,231,183,0.3);
+  }
+  .check-item.checked .check-label { text-decoration: line-through; color: var(--text3); }
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition);
+    font-size: 0.8rem;
+  }
+  .check-item.checked .check-box {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: #0f1117;
+  }
+  .check-label { font-size: 0.9rem; color: var(--text); }
+  .check-sub { font-size: 0.75rem; color: var(--text3); margin-top: 2px; }
+
+  /* ===== BADGE ===== */
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .badge-green { background: rgba(110,231,183,0.15); color: var(--accent2); }
+  .badge-pink { background: rgba(244,114,182,0.15); color: var(--accent3); }
+  .badge-warn { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+  /* ===== INPUTS ===== */
+  input[type="text"], input[type="number"], input[type="date"],
+  textarea, select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    padding: 9px 13px;
+    font-size: 0.88rem;
+    width: 100%;
+    transition: border-color var(--transition);
+    font-family: inherit;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  textarea { resize: vertical; min-height: 90px; }
+  label { font-size: 0.8rem; color: var(--text2); display: block; margin-bottom: 5px; }
+  .form-group { margin-bottom: 14px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-wrap { background: var(--bg3); border-radius: 8px; height: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; border-radius: 8px; background: var(--accent); transition: width 0.4s ease; }
+  .progress-bar.green { background: var(--accent2); }
+  .progress-bar.pink { background: var(--accent3); }
+
+  /* ===== STAT BOX ===== */
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stat-box .stat-label { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-box .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--text); }
+  .stat-box .stat-sub { font-size: 0.78rem; color: var(--text2); }
+
+  /* ===== WATER TRACKER ===== */
+  .water-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .water-cup {
+    width: 44px; height: 48px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    background: var(--bg3);
+  }
+  .water-cup.filled { background: rgba(79,142,247,0.2); border-color: var(--accent); }
+
+  /* ===== SKINCARE PRODUCT CARD ===== */
+  .product-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .product-card h3 { font-size: 0.92rem; font-weight: 700; color: var(--text); }
+  .product-card .prod-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .product-card .prod-info { font-size: 0.8rem; color: var(--text2); }
+  .product-card .prod-warn {
+    font-size: 0.78rem;
+    color: var(--warn);
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 7px;
+    padding: 6px 10px;
+    display: flex; gap: 6px; align-items: flex-start;
+  }
+
+  /* ===== WEEK CALENDAR ===== */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+  .day-col {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 160px;
+  }
+  .day-col.today { border-color: var(--accent); background: rgba(79,142,247,0.06); }
+  .day-col .day-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    text-align: center;
+  }
+  .day-col.today .day-name { color: var(--accent); }
+  .day-col .day-num {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .day-col.today .day-num { color: var(--accent); }
+  .day-event {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    border-radius: 5px;
+    line-height: 1.3;
+  }
+  .day-event.skin { background: rgba(244,114,182,0.15); color: var(--accent3); }
+  .day-event.train { background: rgba(110,231,183,0.15); color: var(--accent2); }
+  .day-event.led { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .day-event.patch { background: rgba(79,142,247,0.15); color: var(--accent); }
+
+  /* ===== RECIPE CARD ===== */
+  .recipe-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .recipe-card h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .recipe-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+  .recipe-meta span {
+    font-size: 0.75rem;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: var(--bg3);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .recipe-card .recipe-note { font-size: 0.8rem; color: var(--text2); }
+
+  /* ===== TABLE ===== */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .data-table th {
+    background: var(--bg3);
+    color: var(--text2);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--bg3); }
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+
+  /* ===== TOAST ===== */
+  #toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 0.88rem;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ===== OVERLAY SIDEBAR MOBILE ===== */
+  #sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 99;
+  }
+
+  /* ===== PRINT ===== */
+  @media print {
+    #sidebar, #topbar, #sidebar-overlay, #toast, .no-print { display: none !important; }
+    #main { margin-left: 0 !important; }
+    body { background: #fff; color: #000; }
+    .card, .product-card, .recipe-card { border: 1px solid #ccc; box-shadow: none; background: #fff; }
+    .card-title, .section-header h2 { color: #000; }
+    .check-label, .check-sub, .stat-value, .stat-label, .stat-sub { color: #000 !important; }
+    .day-col { border: 1px solid #ccc; background: #fff; }
+    .day-name, .day-num { color: #000 !important; }
+    .data-table th, .data-table td { color: #000; border-color: #ccc; }
+    .badge { border: 1px solid #ccc; }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 900px) {
+    :root { --sidebar-w: 0px; }
+    #sidebar {
+      width: 240px;
+      transform: translateX(-100%);
+    }
+    #sidebar.open { transform: translateX(0); }
+    #sidebar-overlay.show { display: block; }
+    #hamburger { display: block; }
+    #main { margin-left: 0; }
+    #content { padding: 18px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: repeat(4, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 500px) {
+    .week-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-auto { grid-template-columns: 1fr; }
+  }
+
+  /* ===== MISC ===== */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+  .text-muted { color: var(--text2); font-size: 0.85rem; }
+  .text-small { font-size: 0.78rem; color: var(--text3); }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-20 { margin-top: 20px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  .mb-16 { margin-bottom: 16px; }
+  .flex { display: flex; }
+  .flex-wrap { flex-wrap: wrap; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .gap-16 { gap: 16px; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .hidden { display: none !important; }
+  .rule-item {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 0.83rem; color: var(--text2);
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-icon { font-size: 0.9rem; margin-top: 1px; }
+  .food-list { display: flex; flex-wrap: wrap; gap: 7px; }
+  .food-tag {
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+  .food-tag.green { background: rgba(110,231,183,0.12); color: var(--accent2); border: 1px solid rgba(110,231,183,0.25); }
+  .food-tag.red { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+  .shopping-section { margin-bottom: 20px; }
+  .shopping-section h3 { font-size: 0.88rem; font-weight: 700; color: var(--text2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .add-item-row { display: flex; gap: 8px; margin-top: 10px; }
+  .add-item-row input { flex: 1; }
+  .health-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .health-item h3 { font-size: 0.9rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .health-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .chart-wrap { position: relative; height: 220px; margin-top: 10px; }
+  .mood-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+  .mood-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+    background: var(--bg3);
+    color: var(--text2);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .mood-btn.selected { border-color: var(--accent); color: var(--accent); background: rgba(79,142,247,0.1); }
+  .steps-display {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--accent2);
+    text-align: center;
+    padding: 10px 0;
+  }
+  .steps-goal { font-size: 0.8rem; color: var(--text3); text-align: center; margin-top: -4px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div id="sidebar-logo">
+      <h1>Manuale<br>di Massimiliano</h1>
+      <p>Wellness &amp; Lifestyle</p>
+    </div>
+    <div id="sidebar-date" id="sidebarDate"></div>
+    <nav id="nav">
+      <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">
+        <span class="icon">🏠</span> Dashboard Oggi
+      </div>
+      <div class="nav-item" data-section="skincare-prodotti" onclick="showSection('skincare-prodotti')">
+        <span class="icon">✨</span> Skincare – Prodotti
+      </div>
+      <div class="nav-item" data-section="skincare-calendario" onclick="showSection('skincare-calendario')">
+        <span class="icon">📅</span> Skincare – Calendario
+      </div>
+      <div class="nav-item" data-section="alimentazione" onclick="showSection('alimentazione')">
+        <span class="icon">🥗</span> Alimentazione
+      </div>
+      <div class="nav-item" data-section="spesa" onclick="showSection('spesa')">
+        <span class="icon">🛒</span> Lista della Spesa
+      </div>
+      <div class="nav-item" data-section="friggitrice" onclick="showSection('friggitrice')">
+        <span class="icon">🍗</span> Friggitrice ad Aria
+      </div>
+      <div class="nav-item" data-section="allenamento" onclick="showSection('allenamento')">
+        <span class="icon">💪</span> Allenamento
+      </div>
+      <div class="nav-item" data-section="progressi" onclick="showSection('progressi')">
+        <span class="icon">📈</span> Progressi
+      </div>
+      <div class="nav-item" data-section="salute" onclick="showSection('salute')">
+        <span class="icon">🏥</span> Salute &amp; Controlli
+      </div>
+      <div class="nav-item" data-section="note" onclick="showSection('note')">
+        <span class="icon">📝</span> Note Personali
+      </div>
+    </nav>
+    <div id="sidebar-footer">
+      <button onclick="exportData()">⬇️ Esporta JSON</button>
+      <button onclick="importData()">⬆️ Importa JSON</button>
+      <button onclick="window.print()">🖨️ Stampa guida</button>
+    </div>
+  </aside>
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <header id="topbar">
+      <div class="flex items-center gap-12">
+        <button id="hamburger" onclick="toggleSidebar()">☰</button>
+        <h2 id="topbar-title">Dashboard Oggi</h2>
+      </div>
+      <div class="topbar-right no-print">
+        <button class="btn btn-ghost btn-sm" onclick="resetDay()">🔄 Reset giornata</button>
+      </div>
+    </header>
+    <div id="content">
+      <!-- Sections injected by JS -->
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+// ============================================================
+// DATA & STORAGE
+// ============================================================
+const STORE_KEY = 'manuale_max_v2';
+let DATA = {};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    DATA = raw ? JSON.parse(raw) : {};
+  } catch(e) { DATA = {}; }
+  // defaults
+  if (!DATA.daily) DATA.daily = {};
+  if (!DATA.shopping) DATA.shopping = defaultShopping();
+  if (!DATA.progressi) DATA.progressi = [];
+  if (!DATA.salute) DATA.salute = defaultSalute();
+  if (!DATA.note) DATA.note = '';
+  if (!DATA.weight_today) DATA.weight_today = '';
+  if (!DATA.steps_today) DATA.steps_today = '';
+  if (!DATA.water_today) DATA.water_today = 0;
+}
+
+function saveData() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(DATA));
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function ensureDay() {
+  const k = todayKey();
+  if (!DATA.daily[k]) {
+    DATA.daily[k] = {
+      skincare_mattina: [],
+      skincare_sera: [],
+      allenamento: [],
+      water: 0,
+      steps: '',
+      weight: '',
+      note: '',
+      completed: false,
+      mood: '',
+      energia: ''
+    };
+  }
+  return DATA.daily[k];
+}
+
+// ============================================================
+// DEFAULTS
+// ============================================================
+function defaultShopping() {
+  return {
+    Proteine: ['Pollo', 'Tacchino', 'Salmone', 'Merluzzo', 'Tonno naturale', 'Gamberi', 'Uova', 'Yogurt greco'],
+    Verdure: ['Zucchine', 'Melanzane', 'Peperoni', 'Broccoli', 'Cavolfiore', 'Carote', 'Fagiolini', 'Spinaci', 'Pomodorini', 'Insalata'],
+    Carboidrati: ['Riso basmati', 'Pane integrale', 'Tortillas integrali', 'Patate', 'Patate dolci'],
+    Frutta: ['Mele', 'Kiwi', 'Frutti di bosco', 'Banane', 'Avocado'],
+    Condimenti: ['Olio EVO', 'Limone', 'Paprika', 'Curry', 'Spezie miste'],
+    Skincare: ['Klairs Cleansing Oil', 'Neogen Foam', 'TIA\'M Toner', 'Bonajour Essence', 'CeraVe SPF50']
+  };
+}
+
+function defaultSalute() {
+  return [
+    { nome: 'Medico di base', icon: '🩺', ultimo: '', prossimo: '', note: '', fatto: false },
+    { nome: 'Esami del sangue', icon: '🩸', ultimo: '', prossimo: '', note: '', fatto: false },
+    { nome: 'Pressione arteriosa', icon: '💊', ultimo: '', prossimo: '', note: '', fatto: false },
+    { nome: 'Dermatologo – nodulo sotto il naso', icon: '🔍', ultimo: '', prossimo: '', note: '', fatto: false },
+    { nome: 'Urologo / Andrologo', icon: '🏥', ultimo: '', prossimo: '', note: '', fatto: false },
+    { nome: 'Dentista', icon: '🦷', ultimo: '', prossimo: '', note: '', fatto: false },
+    { nome: 'Oculista', icon: '👁️', ultimo: '', prossimo: '', note: '', fatto: false }
+  ];
+}
+
+// ============================================================
+// SKINCARE DATA
+// ============================================================
+const PRODOTTI = [
+  {
+    nome: 'Klairs Gentle Black Deep Cleansing Oil',
+    quando: 'Solo sera (primo step doppia detersione)',
+    serve: 'Rimuove trucco, SPF e sebo in eccesso senza irritare',
+    quantita: '2-3 pump, massaggiare a secco poi emulsionare con acqua',
+    attenzione: 'Non usare la mattina. Sciacquare bene per evitare residui oleosi.'
+  },
+  {
+    nome: 'Neogen Real Fresh Foam Heartleaf',
+    quando: 'Mattina e sera (secondo step detersione)',
+    serve: 'Deterge in profondità, calma arrossamenti, anti-acne',
+    quantita: 'Piccola quantità (nocciola), schiumare bene',
+    attenzione: 'Non strofinare eccessivamente. Sciacquare con acqua tiepida, non calda.'
+  },
+  {
+    nome: 'TIA\'M Vita B5 Toner',
+    quando: 'Mattina e sera, dopo detersione',
+    serve: 'Idrata, rimpolpa, prepara la pelle per i passaggi successivi',
+    quantita: '2-3 strati leggeri (metodo 7-skin) o 1 strato abbondante',
+    attenzione: 'Applicare su pelle ancora leggermente umida per massimo assorbimento.'
+  },
+  {
+    nome: 'Bonajour Bio Active Essence',
+    quando: 'Mattina e sera, dopo il toner',
+    serve: 'Antiossidante, uniforma il tono, stimola il rinnovamento cellulare',
+    quantita: '2-3 gocce, tamponare delicatamente',
+    attenzione: 'Non mescolare con acidi forti. Lasciare assorbire 1 minuto prima del passo successivo.'
+  },
+  {
+    nome: 'Medi-Peel Mezzo Filla Eye Serum',
+    quando: 'Mattina e sera, dopo l\'essence',
+    serve: 'Riduce occhiaie, borse, rughe contorno occhi',
+    quantita: 'Piccola quantità (pisello), tamponare con anulare',
+    attenzione: 'Non avvicinarsi troppo all\'occhio. Non strofinare.'
+  },
+  {
+    nome: 'CeraVe Facial Moisturising Lotion SPF50',
+    quando: 'Solo mattina, ultimo step',
+    serve: 'Idrata, ripristina barriera cutanea, protegge dai raggi UV',
+    quantita: '2-3 pump, distribuire uniformemente su viso e collo',
+    attenzione: 'È l\'ultimo step mattutino. Non applicare altri prodotti sopra se si esce. Riapplicare ogni 2h al sole.'
+  },
+  {
+    nome: 'Cell Toxing Dermajou\'s Cream',
+    quando: 'Solo sera, ultimo step idratante',
+    serve: 'Crema nutriente notturna, ripara e rigenera durante il sonno',
+    quantita: 'Noce, distribuire su viso e collo con movimenti verso l\'alto',
+    attenzione: 'Non usare la mattina (troppo ricca sotto SPF). Evitare contorno occhi se già usato eye serum.'
+  },
+  {
+    nome: 'Patch occhi Hyaluron Aqua Peptide 9',
+    quando: 'Sera (martedì e sabato), dopo eye serum',
+    serve: 'Idratazione intensa contorno occhi, riduce gonfiore',
+    quantita: '1 coppia per sessione, lasciare 15-20 minuti',
+    attenzione: 'Non usare ogni giorno. Applicare su pelle pulita e asciutta. Non riutilizzare.'
+  },
+  {
+    nome: 'Haruharu Black Rice Soft Peeling Gel',
+    quando: 'Sera mercoledì (alternare con Nivea Scrub ogni 15 gg)',
+    serve: 'Esfoliazione delicata enzimatica, rimuove cellule morte',
+    quantita: 'Piccola quantità, massaggiare delicatamente a secco fino a formare palline',
+    attenzione: 'MAI nello stesso giorno di Garnier Peel-Off o Nivea Scrub. Non usare se pelle irritata.'
+  },
+  {
+    nome: 'Garnier Pure Active Charcoal Peel-Off',
+    quando: 'Sera venerdì (solo zona T, max ogni 2 settimane)',
+    serve: 'Purifica pori dilatati, rimuove punti neri zona T',
+    quantita: 'Strato sottile uniforme solo su naso, fronte, mento',
+    attenzione: 'MAI con Haruharu o Nivea Scrub. Max ogni 2 settimane. Non applicare su guance o zone secche.'
+  },
+  {
+    nome: 'Nivea Clean Deeper Scrub',
+    quando: 'Alternativa a Haruharu (max ogni 15 giorni)',
+    serve: 'Esfoliazione meccanica più intensa',
+    quantita: 'Piccola quantità, massaggiare in cerchi per 30-60 secondi',
+    attenzione: 'MAI con Haruharu o Garnier nello stesso giorno. Non usare su pelle secca o irritata.'
+  },
+  {
+    nome: 'Project E Beauty Photon Mask LED',
+    quando: 'Dopo detersione serale (lun, mer, dom) – 15-20 minuti',
+    serve: 'Rossa: anti-aging, stimola collagene. Blu: anti-acne. Verde: discromie',
+    quantita: 'Sessione completa 15-20 min. Luce rossa 3x/settimana',
+    attenzione: 'Luce blu solo in caso di brufoli attivi. Luce verde facoltativa. Non usare occhiali di protezione rimossi.'
+  }
+];
+
+const CALENDARIO_SKIN = {
+  0: { // domenica
+    mattina: ['Neogen', 'TIA\'M', 'Bonajour', 'Eye Serum', 'CeraVe SPF50'],
+    sera: ['Klairs', 'Neogen', 'TIA\'M', 'Bonajour', 'Cell Toxing', 'Eye Serum'],
+    extra: ['LED rossa 15-20 min', '📸 Giorno controllo foto/progressi']
+  },
+  1: { // lunedì
+    mattina: ['Neogen', 'TIA\'M', 'Bonajour', 'Eye Serum', 'CeraVe SPF50'],
+    sera: ['Klairs', 'Neogen', 'TIA\'M', 'Bonajour', 'Cell Toxing', 'Eye Serum'],
+    extra: ['LED rossa 15-20 min']
+  },
+  2: { // martedì
+    mattina: ['Neogen', 'TIA\'M', 'Bonajour', 'Eye Serum', 'CeraVe SPF50'],
+    sera: ['Klairs', 'Neogen', 'TIA\'M', 'Bonajour', 'Cell Toxing', 'Eye Serum'],
+    extra: ['Patch occhi 15-20 min']
+  },
+  3: { // mercoledì
+    mattina: ['Neogen', 'TIA\'M', 'Bonajour', 'Eye Serum', 'CeraVe SPF50'],
+    sera: ['Klairs', 'Neogen', 'Haruharu Peeling Gel', 'TIA\'M', 'Bonajour', 'Cell Toxing'],
+    extra: ['LED rossa 15-20 min', '⚠️ No scrub o maschera Garnier oggi']
+  },
+  4: { // giovedì
+    mattina: ['Neogen', 'TIA\'M', 'Bonajour', 'Eye Serum', 'CeraVe SPF50'],
+    sera: ['Klairs', 'Neogen', 'TIA\'M', 'Bonajour', 'Cell Toxing', 'Eye Serum'],
+    extra: []
+  },
+  5: { // venerdì
+    mattina: ['Neogen', 'TIA\'M', 'Bonajour', 'Eye Serum', 'CeraVe SPF50'],
+    sera: ['Klairs', 'Neogen', 'Garnier Charcoal (solo zona T)', 'TIA\'M', 'Bonajour', 'Cell Toxing'],
+    extra: ['⚠️ No peeling o scrub oggi']
+  },
+  6: { // sabato
+    mattina: ['Neogen', 'TIA\'M', 'Bonajour', 'Eye Serum', 'CeraVe SPF50'],
+    sera: ['Klairs', 'Neogen', 'TIA\'M', 'Bonajour', 'Cell Toxing', 'Eye Serum'],
+    extra: ['Patch occhi 15-20 min']
+  }
+};
+
+const GIORNI_NOMI = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+const GIORNI_SHORT = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+
+const RICETTE = [
+  {
+    nome: 'Hamburger magro',
+    ingredienti: 'Hamburger di manzo magro, sale, pepe, paprika',
+    temp: '200°C', minuti: '10-12 min', gira: 'A metà cottura (5-6 min)',
+    note: 'Non schiacciare durante la cottura. Lasciare riposare 2 min.',
+    abbinamento: 'Insalata mista, pomodorini, pane integrale tostato'
+  },
+  {
+    nome: 'Pollo paprika e limone',
+    ingredienti: 'Petto di pollo, paprika, succo di limone, olio EVO, sale',
+    temp: '190°C', minuti: '16-18 min', gira: 'A metà cottura',
+    note: 'Marinare almeno 30 min per più sapore. Taglio uniforme per cottura omogenea.',
+    abbinamento: 'Riso basmati, zucchine grigliate'
+  },
+  {
+    nome: 'Pollo al curry leggero',
+    ingredienti: 'Petto di pollo, curry, yogurt greco, aglio, olio EVO',
+    temp: '190°C', minuti: '16-18 min', gira: 'A metà cottura',
+    note: 'Lo yogurt nella marinatura mantiene il pollo morbido.',
+    abbinamento: 'Riso basmati, patate dolci'
+  },
+  {
+    nome: 'Tacchino speziato',
+    ingredienti: 'Fettine di tacchino, cumino, coriandolo, aglio, limone, olio EVO',
+    temp: '185°C', minuti: '12-14 min', gira: 'A metà cottura',
+    note: 'Il tacchino si asciuga facilmente: non superare i tempi indicati.',
+    abbinamento: 'Fagiolini al vapore, pane integrale'
+  },
+  {
+    nome: 'Salmone',
+    ingredienti: 'Filetto di salmone, limone, aneto, olio EVO, sale',
+    temp: '180°C', minuti: '10-12 min', gira: 'Non girare (cuoce bene da un lato)',
+    note: 'Controllare a 10 min: deve essere opaco all\'esterno, leggermente rosa al centro.',
+    abbinamento: 'Insalata, avocado, riso basmati'
+  },
+  {
+    nome: 'Merluzzo',
+    ingredienti: 'Filetto di merluzzo, limone, prezzemolo, olio EVO, sale',
+    temp: '180°C', minuti: '10-12 min', gira: 'Delicatamente a metà se spesso',
+    note: 'Pesce delicato: non cuocere troppo. Si sfalda facilmente.',
+    abbinamento: 'Patate al forno, verdure miste'
+  },
+  {
+    nome: 'Gamberi al limone',
+    ingredienti: 'Gamberi sgusciati, limone, aglio, olio EVO, prezzemolo',
+    temp: '200°C', minuti: '6-8 min', gira: 'A metà cottura',
+    note: 'Cottura rapida: appena diventano rosa sono pronti. Non cuocere troppo.',
+    abbinamento: 'Insalata, tortillas integrali, avocado'
+  },
+  {
+    nome: 'Zucchine',
+    ingredienti: 'Zucchine a rondelle o bastoncini, olio EVO, sale, pepe',
+    temp: '185°C', minuti: '12-15 min', gira: 'A metà cottura',
+    note: 'Taglio uniforme per cottura omogenea. Aggiungere erbe a fine cottura.',
+    abbinamento: 'Pollo, salmone, uova'
+  },
+  {
+    nome: 'Melanzane',
+    ingredienti: 'Melanzane a cubetti o fette, olio EVO, sale, origano',
+    temp: '190°C', minuti: '14-16 min', gira: 'A metà cottura',
+    note: 'Salare prima e lasciare riposare 10 min per eliminare l\'amaro.',
+    abbinamento: 'Pollo, tacchino, riso basmati'
+  },
+  {
+    nome: 'Broccoli',
+    ingredienti: 'Cimette di broccoli, olio EVO, aglio, sale, peperoncino facoltativo',
+    temp: '190°C', minuti: '10-12 min', gira: 'A metà cottura',
+    note: 'Le cimette devono essere asciutte prima di condire.',
+    abbinamento: 'Salmone, pollo, uova'
+  },
+  {
+    nome: 'Patate',
+    ingredienti: 'Patate a cubetti o spicchi, olio EVO, rosmarino, sale, paprika',
+    temp: '200°C', minuti: '20-25 min', gira: 'Ogni 8-10 min',
+    note: 'Asciugare bene le patate prima di condire. Non sovraffollare il cestello.',
+    abbinamento: 'Hamburger, pollo, merluzzo'
+  },
+  {
+    nome: 'Patate dolci',
+    ingredienti: 'Patate dolci a cubetti, olio EVO, cannella, sale',
+    temp: '195°C', minuti: '18-22 min', gira: 'A metà cottura',
+    note: 'Cuociono più velocemente delle patate normali. Ottima alternativa dolce.',
+    abbinamento: 'Pollo al curry, tacchino, yogurt greco'
+  },
+  {
+    nome: 'Frittata',
+    ingredienti: '3 uova, sale, pepe, verdure a scelta (zucchine, peperoni)',
+    temp: '170°C', minuti: '12-15 min', gira: 'Non girare (usare stampo)',
+    note: 'Usare uno stampo in silicone adatto alla friggitrice. Controllare la consistenza.',
+    abbinamento: 'Insalata, pane integrale'
+  },
+  {
+    nome: 'Polpette di tacchino',
+    ingredienti: 'Macinato di tacchino, uovo, pangrattato integrale, prezzemolo, sale',
+    temp: '190°C', minuti: '14-16 min', gira: 'A metà cottura',
+    note: 'Polpette di dimensione uniforme per cottura omogenea.',
+    abbinamento: 'Riso basmati, verdure miste, pomodorini'
+  },
+  {
+    nome: 'Verdure miste',
+    ingredienti: 'Mix di peperoni, zucchine, melanzane, cipolla, olio EVO, erbe',
+    temp: '190°C', minuti: '15-18 min', gira: 'A metà cottura',
+    note: 'Taglio uniforme. Non sovraffollare per permettere la circolazione dell\'aria.',
+    abbinamento: 'Qualsiasi proteina, riso basmati'
+  }
+];
+
+const ALLENAMENTO = [
+  { nome: 'Squat', dettaglio: '3 serie × 12-15 rip', icon: '🦵', note: 'Schiena dritta, ginocchia allineate con i piedi' },
+  { nome: 'Glute Bridge', dettaglio: '3 serie × 15 rip', icon: '🍑', note: 'Contrai i glutei in cima, mantieni 1 secondo' },
+  { nome: 'Affondi', dettaglio: '3 serie × 10 rip per gamba', icon: '🚶', note: 'Passo ampio, ginocchio posteriore sfiora il suolo' },
+  { nome: 'Plank', dettaglio: '3 serie (30-60 sec)', icon: '🏋️', note: 'Corpo in linea, non alzare i fianchi' },
+  { nome: 'Camminata', dettaglio: 'Obiettivo: 8.000-10.000 passi', icon: '👟', note: 'Passo svelto, braccia in movimento' }
+];
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const SECTION_TITLES = {
+  'dashboard': 'Dashboard Oggi',
+  'skincare-prodotti': 'Skincare – Prodotti',
+  'skincare-calendario': 'Skincare – Calendario',
+  'alimentazione': 'Alimentazione',
+  'spesa': 'Lista della Spesa',
+  'friggitrice': 'Friggitrice ad Aria',
+  'allenamento': 'Allenamento',
+  'progressi': 'Progressi',
+  'salute': 'Salute & Controlli',
+  'note': 'Note Personali'
+};
+
+let currentSection = 'dashboard';
+
+function showSection(id) {
+  currentSection = id;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.section === id);
+  });
+  document.getElementById('topbar-title').textContent = SECTION_TITLES[id] || id;
+  renderSection(id);
+  closeSidebar();
+}
+
+function renderSection(id) {
+  const c = document.getElementById('content');
+  switch(id) {
+    case 'dashboard': c.innerHTML = renderDashboard(); break;
+    case 'skincare-prodotti': c.innerHTML = renderSkincareProducts(); break;
+    case 'skincare-calendario': c.innerHTML = renderSkincareCalendar(); break;
+    case 'alimentazione': c.innerHTML = renderAlimentazione(); break;
+    case 'spesa': c.innerHTML = renderSpesa(); break;
+    case 'friggitrice': c.innerHTML = renderFriggitrice(); break;
+    case 'allenamento': c.innerHTML = renderAllenamento(); break;
+    case 'progressi': c.innerHTML = renderProgressi(); break;
+    case 'salute': c.innerHTML = renderSalute(); break;
+    case 'note': c.innerHTML = renderNote(); break;
+    default: c.innerHTML = '<p>Sezione non trovata.</p>';
+  }
+  afterRender(id);
+}
+
+// ============================================================
+// SIDEBAR MOBILE
+// ============================================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const day = ensureDay();
+  const today = new Date();
+  const dow = today.getDay();
+  const skin = CALENDARIO_SKIN[dow];
+  const dateStr = today.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // Skincare checklist items
+  const mattItems = skin.mattina.map((s,i) => ({id:`sm_${i}`, label: s}));
+  const seraItems = skin.sera.map((s,i) => ({id:`ss_${i}`, label: s}));
+  const allItems = ALLENAMENTO.map((a,i) => ({id:`al_${i}`, label: a.nome, sub: a.dettaglio}));
+
+  return `
+  <div class="section-header">
+    <h2>🏠 Dashboard Oggi</h2>
+    <p>${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)}</p>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="grid-3 mb-16">
+    <div class="stat-box">
+      <span class="stat-label">⚖️ Peso</span>
+      <input type="number" step="0.1" placeholder="kg" value="${day.weight || ''}"
+        style="font-size:1.4rem;font-weight:700;background:transparent;border:none;color:var(--accent2);padding:0;width:100%"
+        onchange="setDayField('weight', this.value)">
+      <span class="stat-sub">Obiettivo: 70 kg</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">👟 Passi</span>
+      <input type="number" placeholder="0" value="${day.steps || ''}"
+        style="font-size:1.4rem;font-weight:700;background:transparent;border:none;color:var(--accent);padding:0;width:100%"
+        onchange="setDayField('steps', this.value)">
+      <span class="stat-sub">Obiettivo: 8.000-10.000</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">💧 Acqua</span>
+      <div class="steps-display" id="water-count">${day.water || 0} / 8</div>
+      <div class="progress-wrap mt-8">
+        <div class="progress-bar" id="water-bar" style="width:${Math.min(100,(day.water||0)/8*100)}%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WATER CUPS -->
+  <div class="card mb-16">
+    <div class="card-title"><span class="dot"></span>Acqua bevuta</div>
+    <div class="water-grid" id="water-grid">
+      ${[...Array(8)].map((_,i)=>`<div class="water-cup ${i < (day.water||0) ? 'filled' : ''}" onclick="setWater(${i+1})" title="${(i+1)*250} ml"><span style="font-size:1.1rem">💧</span><span style="font-size:0.6rem;color:var(--text3);display:block;text-align:center;margin-top:1px">${(i+1)*250}ml</span></div>`).join('')}
+    </div>
+    <p class="text-small mt-8">Ogni goccia = 250 ml · Clicca per aggiornare</p>
+  </div>
+
+  <!-- SKINCARE MATTINA -->
+  <div class="grid-2 mb-16">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--warn)"></span>Skincare Mattina</div>
+      <div class="checklist" id="skin-mattina">
+        ${mattItems.map(item => `
+          <div class="check-item ${(day.skincare_mattina||[]).includes(item.id) ? 'checked' : ''}"
+            onclick="toggleDayCheck('skincare_mattina','${item.id}',this)">
+            <div class="check-box">${(day.skincare_mattina||[]).includes(item.id) ? '✓' : ''}</div>
+            <div><div class="check-label">${item.label}</div></div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Skincare Sera</div>
+      <div class="checklist" id="skin-sera">
+        ${seraItems.map(item => `
+          <div class="check-item ${(day.skincare_sera||[]).includes(item.id) ? 'checked' : ''}"
+            onclick="toggleDayCheck('skincare_sera','${item.id}',this)">
+            <div class="check-box">${(day.skincare_sera||[]).includes(item.id) ? '✓' : ''}</div>
+            <div><div class="check-label">${item.label}</div></div>
+          </div>`).join('')}
+      </div>
+      ${skin.extra.length ? `<div class="mt-12">${skin.extra.map(e=>`<div class="badge badge-warn" style="margin:3px 3px 0 0">${e}</div>`).join('')}</div>` : ''}
+      <hr class="divider">
+      <div class="card-title" style="margin-bottom:8px"><span class="dot" style="background:var(--accent)"></span>Prodotti extra / variazioni</div>
+      <div class="checklist" id="skin-extra-list">
+        ${(day.skincare_extra||[]).map((item,i) => `
+          <div class="check-item checked">
+            <div class="check-box" style="background:var(--accent2);border-color:var(--accent2);color:#0f1117">✓</div>
+            <div class="check-label" style="flex:1">${item}</div>
+            <button class="btn btn-ghost btn-sm" style="padding:2px 8px" onclick="event.stopPropagation();removeSkinExtra(${i})">✕</button>
+          </div>`).join('')}
+      </div>
+      <div class="add-item-row no-print" style="margin-top:10px">
+        <input type="text" placeholder="es. Patch occhi, maschera extra..." id="skin-extra-input" onkeydown="if(event.key==='Enter')addSkinExtra()">
+        <button class="btn btn-primary btn-sm" onclick="addSkinExtra()">+ Aggiungi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALLENAMENTO -->
+  <div class="card mb-16">
+    <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Allenamento del giorno</div>
+    <div class="checklist">
+      ${allItems.map(item => `
+        <div class="check-item ${(day.allenamento||[]).includes(item.id) ? 'checked' : ''}"
+          onclick="toggleDayCheck('allenamento','${item.id}',this)">
+          <div class="check-box">${(day.allenamento||[]).includes(item.id) ? '✓' : ''}</div>
+          <div>
+            <div class="check-label">${item.label}</div>
+            <div class="check-sub">${item.sub}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- MOOD & ENERGIA -->
+  <div class="grid-2 mb-16">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Umore</div>
+      <div class="mood-row">
+        ${['😴 Stanco','😐 Neutro','🙂 Ok','😊 Bene','🔥 Ottimo'].map(m=>`
+          <button class="mood-btn ${day.mood===m?'selected':''}" onclick="setMood('${m}',this)">${m}</button>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--warn)"></span>Energia</div>
+      <div class="mood-row">
+        ${['⚡ Bassa','⚡⚡ Media','⚡⚡⚡ Alta'].map(e=>`
+          <button class="mood-btn ${day.energia===e?'selected':''}" onclick="setEnergia('${e}',this)">${e}</button>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTE GIORNALIERE -->
+  <div class="card mb-16">
+    <div class="card-title"><span class="dot"></span>Note del giorno</div>
+    <textarea placeholder="Scrivi qui le note di oggi..." onchange="setDayField('note',this.value)">${day.note||''}</textarea>
+  </div>
+
+  <!-- GIORNATA COMPLETATA -->
+  <div class="btn-row">
+    <button class="btn ${day.completed ? 'btn-success' : 'btn-primary'}" onclick="toggleCompleted()">
+      ${day.completed ? '✅ Giornata completata!' : '🎯 Segna giornata completata'}
+    </button>
+  </div>`;
+}
+
+function addSkinExtra() {
+  const input = document.getElementById('skin-extra-input');
+  const val = input.value.trim();
+  if (!val) return;
+  const day = ensureDay();
+  if (!day.skincare_extra) day.skincare_extra = [];
+  day.skincare_extra.push(val);
+  saveData();
+  input.value = '';
+  // Re-render only the extra list
+  const list = document.getElementById('skin-extra-list');
+  if (list) {
+    list.innerHTML = (day.skincare_extra||[]).map((item,i) => `
+      <div class="check-item checked">
+        <div class="check-box" style="background:var(--accent2);border-color:var(--accent2);color:#0f1117">✓</div>
+        <div class="check-label" style="flex:1">${item}</div>
+        <button class="btn btn-ghost btn-sm" style="padding:2px 8px" onclick="event.stopPropagation();removeSkinExtra(${i})">✕</button>
+      </div>`).join('');
+  }
+  showToast(`✅ "${val}" aggiunto alla skincare di oggi`);
+}
+
+function removeSkinExtra(idx) {
+  const day = ensureDay();
+  if (!day.skincare_extra) return;
+  day.skincare_extra.splice(idx, 1);
+  saveData();
+  renderSection('dashboard');
+}
+
+function setDayField(field, value) {
+  const day = ensureDay();
+  day[field] = value;
+  saveData();
+}
+
+function toggleDayCheck(field, id, el) {
+  const day = ensureDay();
+  if (!day[field]) day[field] = [];
+  const idx = day[field].indexOf(id);
+  if (idx === -1) {
+    day[field].push(id);
+    el.classList.add('checked');
+    el.querySelector('.check-box').textContent = '✓';
+    el.querySelector('.check-label').style.textDecoration = 'line-through';
+  } else {
+    day[field].splice(idx, 1);
+    el.classList.remove('checked');
+    el.querySelector('.check-box').textContent = '';
+    el.querySelector('.check-label').style.textDecoration = '';
+  }
+  saveData();
+}
+
+function setWater(n) {
+  const day = ensureDay();
+  day.water = n;
+  saveData();
+  document.getElementById('water-count').textContent = `${n} / 8`;
+  document.getElementById('water-bar').style.width = `${Math.min(100, n/8*100)}%`;
+  document.querySelectorAll('.water-cup').forEach((cup, i) => {
+    cup.classList.toggle('filled', i < n);
+  });
+}
+
+function setMood(m, el) {
+  const day = ensureDay();
+  day.mood = m;
+  saveData();
+  el.closest('.mood-row').querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function setEnergia(e, el) {
+  const day = ensureDay();
+  day.energia = e;
+  saveData();
+  el.closest('.mood-row').querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleCompleted() {
+  const day = ensureDay();
+  day.completed = !day.completed;
+  saveData();
+  showToast(day.completed ? '🎉 Ottimo lavoro! Giornata completata.' : 'Giornata de-completata.');
+  renderSection('dashboard');
+}
+
+function resetDay() {
+  if (!confirm('Resettare tutti i dati di oggi? L\'azione non è reversibile.')) return;
+  const k = todayKey();
+  delete DATA.daily[k];
+  saveData();
+  showToast('🔄 Giornata resettata.');
+  renderSection('dashboard');
+}
+
+// ============================================================
+// SKINCARE PRODOTTI
+// ============================================================
+function renderSkincareProducts() {
+  return `
+  <div class="section-header">
+    <h2>✨ Skincare – Prodotti</h2>
+    <p>I tuoi ${PRODOTTI.length} prodotti con istruzioni d'uso</p>
+  </div>
+  <div class="grid-auto">
+    ${PRODOTTI.map(p => `
+      <div class="product-card">
+        <h3>${p.nome}</h3>
+        <div class="prod-row">
+          <span class="badge badge-blue">🕐 ${p.quando}</span>
+        </div>
+        <div class="prod-info"><strong>A cosa serve:</strong> ${p.serve}</div>
+        <div class="prod-info"><strong>Quantità:</strong> ${p.quantita}</div>
+        <div class="prod-warn">⚠️ <span>${p.attenzione}</span></div>
+      </div>`).join('')}
+  </div>`;
+}
+
+// ============================================================
+// SKINCARE CALENDARIO
+// ============================================================
+function renderSkincareCalendar() {
+  const today = new Date();
+  const dow = today.getDay();
+  // Build week starting from Monday
+  const days = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today);
+    const diff = i - (dow === 0 ? 7 : dow);
+    d.setDate(today.getDate() + diff);
+    days.push({ date: d, dow: d.getDay() });
+  }
+
+  const regole = [
+    { icon: '🚫', text: 'Mai Haruharu, Nivea Scrub e Garnier Peel-Off nello stesso giorno' },
+    { icon: '📅', text: 'Maschera Garnier massimo ogni 2 settimane' },
+    { icon: '📅', text: 'Nivea Scrub massimo ogni 15 giorni, al posto di Haruharu' },
+    { icon: '💡', text: 'LED rossa 3 volte a settimana (lun, mer, dom)' },
+    { icon: '💡', text: 'Luce blu solo in caso di brufoli attivi' },
+    { icon: '💡', text: 'Luce verde facoltativa per discromie' },
+    { icon: '☀️', text: 'SPF ogni mattina se si esce' }
+  ];
+
+  return `
+  <div class="section-header">
+    <h2>📅 Skincare – Calendario Settimanale</h2>
+    <p>Routine giornaliera personalizzata</p>
+  </div>
+
+  <div class="week-grid mb-16">
+    ${days.map(({date, dow: d}) => {
+      const skin = CALENDARIO_SKIN[d];
+      const isToday = date.toDateString() === today.toDateString();
+      return `
+        <div class="day-col ${isToday ? 'today' : ''}">
+          <div class="day-name">${GIORNI_SHORT[d]}</div>
+          <div class="day-num">${date.getDate()}</div>
+          <div class="day-event skin">☀️ ${skin.mattina.length} step</div>
+          <div class="day-event skin">🌙 ${skin.sera.length} step</div>
+          ${skin.extra.map(e => {
+            let cls = 'led';
+            if (e.includes('Patch')) cls = 'patch';
+            if (e.includes('foto')) cls = 'train';
+            return `<div class="day-event ${cls}" style="font-size:0.65rem">${e}</div>`;
+          }).join('')}
+        </div>`;
+    }).join('')}
+  </div>
+
+  <!-- DETTAGLIO GIORNO CORRENTE -->
+  <div class="card mb-16">
+    <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Routine di oggi – ${GIORNI_NOMI[dow]}</div>
+    <div class="grid-2">
+      <div>
+        <p class="text-small mb-8">☀️ MATTINA</p>
+        <ol style="padding-left:18px;display:flex;flex-direction:column;gap:6px">
+          ${CALENDARIO_SKIN[dow].mattina.map((s,i) => `<li style="font-size:0.85rem;color:var(--text)">${s}</li>`).join('')}
+        </ol>
+      </div>
+      <div>
+        <p class="text-small mb-8">🌙 SERA</p>
+        <ol style="padding-left:18px;display:flex;flex-direction:column;gap:6px">
+          ${CALENDARIO_SKIN[dow].sera.map((s,i) => `<li style="font-size:0.85rem;color:var(--text)">${s}</li>`).join('')}
+        </ol>
+        ${CALENDARIO_SKIN[dow].extra.length ? `
+          <div class="mt-12">
+            ${CALENDARIO_SKIN[dow].extra.map(e => `<div class="badge badge-warn" style="margin:3px 3px 0 0">${e}</div>`).join('')}
+          </div>` : ''}
+      </div>
+    </div>
+  </div>
+
+  <!-- REGOLE -->
+  <div class="card">
+    <div class="card-title"><span class="dot" style="background:var(--danger)"></span>Regole da rispettare</div>
+    ${regole.map(r => `
+      <div class="rule-item">
+        <span class="rule-icon">${r.icon}</span>
+        <span>${r.text}</span>
+      </div>`).join('')}
+  </div>`;
+}
+
+// ============================================================
+// ALIMENTAZIONE
+// ============================================================
+function renderAlimentazione() {
+  const verde = ['Pollo','Tacchino','Hamburger magri','Salmone','Merluzzo','Tonno naturale','Gamberi','Uova','Yogurt greco','Zucchine','Melanzane','Peperoni','Broccoli','Cavolfiore','Carote','Fagiolini','Spinaci','Pomodorini','Insalata','Riso basmati','Pane integrale','Tortillas integrali','Patate','Patate dolci','Avocado','Mele','Kiwi','Frutti di bosco','Banane','Tè senza zucchero','Acqua','Caffè senza zucchero'];
+  const nera = ['Alcolici','Bibite zuccherate','Cocktail','Merendine','Dolci industriali','Patatine','Snack salati','Fritti frequenti','Fast food','Maionese e salse caloriche','Salumi grassi','Formaggi molto stagionati in eccesso'];
+
+  return `
+  <div class="section-header">
+    <h2>🥗 Alimentazione</h2>
+    <p>Obiettivo: arrivare gradualmente a 70 kg</p>
+  </div>
+
+  <div class="grid-2 mb-16">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Lista Verde ✅</div>
+      <div class="food-list">
+        ${verde.map(f => `<span class="food-tag green">${f}</span>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--danger)"></span>Lista Nera ❌</div>
+      <div class="food-list">
+        ${nera.map(f => `<span class="food-tag red">${f}</span>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot" style="background:var(--warn)"></span>Principi guida</div>
+    <div class="checklist">
+      ${[
+        'Preferire cottura al vapore, friggitrice ad aria, griglia',
+        'Porzioni moderate: non saltare i pasti',
+        'Almeno 1,5-2 litri di acqua al giorno',
+        'Proteine ad ogni pasto principale',
+        'Verdure come base, non come contorno',
+        'Carboidrati complessi, non raffinati',
+        'Spuntini: frutta, yogurt greco, frutta secca in piccole quantità',
+        'Leggere le etichette: evitare zuccheri aggiunti nascosti'
+      ].map((p,i) => `
+        <div class="check-item" onclick="this.classList.toggle('checked');this.querySelector('.check-box').textContent=this.classList.contains('checked')?'✓':''">
+          <div class="check-box"></div>
+          <div class="check-label">${p}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// LISTA DELLA SPESA
+// ============================================================
+function renderSpesa() {
+  const cats = Object.keys(DATA.shopping);
+  return `
+  <div class="section-header">
+    <h2>🛒 Lista della Spesa</h2>
+    <p>Organizzata per categoria. Spunta quello che hai già.</p>
+  </div>
+  <div class="btn-row mb-16 no-print">
+    <button class="btn btn-ghost btn-sm" onclick="resetSpesa()">🔄 Reset spunte</button>
+  </div>
+  ${cats.map(cat => `
+    <div class="shopping-section">
+      <div class="card">
+        <h3 class="card-title"><span class="dot"></span>${cat}</h3>
+        <div class="checklist" id="spesa-${cat}">
+          ${(DATA.shopping[cat]||[]).map((item,i) => `
+            <div class="check-item ${item.startsWith('✓') ? 'checked' : ''}"
+              onclick="toggleSpesaItem('${cat}',${i},this)">
+              <div class="check-box">${item.startsWith('✓') ? '✓' : ''}</div>
+              <div class="check-label">${item.replace(/^✓/,'')}</div>
+              <button class="btn btn-ghost btn-sm" style="margin-left:auto;padding:3px 8px"
+                onclick="event.stopPropagation();removeSpesaItem('${cat}',${i})">✕</button>
+            </div>`).join('')}
+        </div>
+        <div class="add-item-row no-print">
+          <input type="text" placeholder="Aggiungi prodotto..." id="new-${cat}" onkeydown="if(event.key==='Enter')addSpesaItem('${cat}')">
+          <button class="btn btn-primary btn-sm" onclick="addSpesaItem('${cat}')">+ Aggiungi</button>
+        </div>
+      </div>
+    </div>`).join('')}`;
+}
+
+function toggleSpesaItem(cat, idx, el) {
+  const items = DATA.shopping[cat];
+  if (!items) return;
+  items[idx] = items[idx].startsWith('✓') ? items[idx].slice(1) : '✓' + items[idx];
+  saveData();
+  el.classList.toggle('checked');
+  const box = el.querySelector('.check-box');
+  box.textContent = items[idx].startsWith('✓') ? '✓' : '';
+}
+
+function addSpesaItem(cat) {
+  const input = document.getElementById(`new-${cat}`);
+  const val = input.value.trim();
+  if (!val) return;
+  if (!DATA.shopping[cat]) DATA.shopping[cat] = [];
+  DATA.shopping[cat].push(val);
+  saveData();
+  input.value = '';
+  renderSection('spesa');
+  showToast(`✅ "${val}" aggiunto a ${cat}`);
+}
+
+function removeSpesaItem(cat, idx) {
+  DATA.shopping[cat].splice(idx, 1);
+  saveData();
+  renderSection('spesa');
+}
+
+function resetSpesa() {
+  Object.keys(DATA.shopping).forEach(cat => {
+    DATA.shopping[cat] = DATA.shopping[cat].map(i => i.replace(/^✓/,''));
+  });
+  saveData();
+  renderSection('spesa');
+  showToast('🔄 Spunte resettate');
+}
+
+// ============================================================
+// FRIGGITRICE
+// ============================================================
+function renderFriggitrice() {
+  return `
+  <div class="section-header">
+    <h2>🍗 Friggitrice ad Aria</h2>
+    <p>${RICETTE.length} ricette con ingredienti, temperatura e tempi</p>
+  </div>
+  <div class="grid-auto">
+    ${RICETTE.map(r => `
+      <div class="recipe-card">
+        <h3>${r.nome}</h3>
+        <div class="recipe-meta">
+          <span>🌡️ ${r.temp}</span>
+          <span>⏱️ ${r.minuti}</span>
+          <span>🔄 ${r.gira}</span>
+        </div>
+        <div class="recipe-note"><strong>Ingredienti:</strong> ${r.ingredienti}</div>
+        <div class="recipe-note"><strong>Note:</strong> ${r.note}</div>
+        <div class="recipe-note" style="color:var(--accent2)"><strong>Abbinamento:</strong> ${r.abbinamento}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+// ============================================================
+// ALLENAMENTO
+// ============================================================
+function renderAllenamento() {
+  const today = new Date();
+  const dow = today.getDay();
+  // Training days: Mon, Wed, Fri (1, 3, 5)
+  const trainDays = [1, 3, 5];
+  const isTrainDay = trainDays.includes(dow);
+
+  const days = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today);
+    const diff = i - (dow === 0 ? 7 : dow);
+    d.setDate(today.getDate() + diff);
+    days.push({ date: d, dow: d.getDay() });
+  }
+
+  return `
+  <div class="section-header">
+    <h2>💪 Allenamento</h2>
+    <p>Programma base 3 volte a settimana</p>
+  </div>
+
+  <!-- WEEK CALENDAR -->
+  <div class="week-grid mb-16">
+    ${days.map(({date, dow: d}) => {
+      const isTrain = trainDays.includes(d);
+      const isToday = date.toDateString() === today.toDateString();
+      return `
+        <div class="day-col ${isToday ? 'today' : ''}">
+          <div class="day-name">${GIORNI_SHORT[d]}</div>
+          <div class="day-num">${date.getDate()}</div>
+          ${isTrain ? '<div class="day-event train">💪 Allenamento</div>' : '<div class="day-event" style="background:rgba(100,116,139,0.1);color:var(--text3)">🚶 Camminata</div>'}
+        </div>`;
+    }).join('')}
+  </div>
+
+  ${isTrainDay ? `<div class="badge badge-green mb-16" style="font-size:0.85rem;padding:8px 16px">💪 Oggi è giorno di allenamento!</div>` : `<div class="badge badge-blue mb-16" style="font-size:0.85rem;padding:8px 16px">🚶 Oggi: camminata 8.000-10.000 passi</div>`}
+
+  <!-- ESERCIZI -->
+  <div class="card mb-16">
+    <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Esercizi – Checklist sessione</div>
+    <div class="checklist">
+      ${ALLENAMENTO.map((a,i) => {
+        const day = ensureDay();
+        const checked = (day.allenamento||[]).includes(`al_${i}`);
+        return `
+          <div class="check-item ${checked ? 'checked' : ''}"
+            onclick="toggleDayCheck('allenamento','al_${i}',this)">
+            <div class="check-box">${checked ? '✓' : ''}</div>
+            <div>
+              <div class="check-label">${a.icon} ${a.nome} – <strong>${a.dettaglio}</strong></div>
+              <div class="check-sub">${a.note}</div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <!-- NOTE ALLENAMENTO -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Note allenamento</div>
+    <div class="checklist">
+      ${[
+        'Riscaldamento 5 min prima (camminata o mobilità)',
+        'Defaticamento 5 min dopo (stretching)',
+        'Bevi acqua durante la sessione',
+        'Se hai dolore articolare, fermati',
+        'Progressione graduale: aumenta reps o peso ogni 2-3 settimane'
+      ].map(n => `
+        <div class="check-item" onclick="this.classList.toggle('checked');this.querySelector('.check-box').textContent=this.classList.contains('checked')?'✓':''">
+          <div class="check-box"></div>
+          <div class="check-label">${n}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// PROGRESSI
+// ============================================================
+function renderProgressi() {
+  return `
+  <div class="section-header">
+    <h2>📈 Progressi</h2>
+    <p>Traccia peso, misure, umore ed energia nel tempo</p>
+  </div>
+
+  <!-- FORM INSERIMENTO -->
+  <div class="card mb-16">
+    <div class="card-title"><span class="dot"></span>Aggiungi misurazione</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="p-data" value="${todayKey()}">
+      </div>
+      <div class="form-group">
+        <label>Peso (kg)</label>
+        <input type="number" step="0.1" id="p-peso" placeholder="es. 75.5">
+      </div>
+      <div class="form-group">
+        <label>Girovita (cm)</label>
+        <input type="number" step="0.5" id="p-girovita" placeholder="es. 85">
+      </div>
+      <div class="form-group">
+        <label>Passi</label>
+        <input type="number" id="p-passi" placeholder="es. 8500">
+      </div>
+      <div class="form-group">
+        <label>Umore</label>
+        <select id="p-umore">
+          <option value="">–</option>
+          <option>😴 Stanco</option>
+          <option>😐 Neutro</option>
+          <option>🙂 Ok</option>
+          <option>😊 Bene</option>
+          <option>🔥 Ottimo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Energia</label>
+        <select id="p-energia">
+          <option value="">–</option>
+          <option>⚡ Bassa</option>
+          <option>⚡⚡ Media</option>
+          <option>⚡⚡⚡ Alta</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Note</label>
+      <input type="text" id="p-note" placeholder="Note libere...">
+    </div>
+    <div class="form-group">
+      <label>Nome file foto (opzionale)</label>
+      <input type="text" id="p-foto" placeholder="es. foto_luglio_2026.jpg">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="addProgressi()">+ Aggiungi misurazione</button>
+    </div>
+  </div>
+
+  <!-- GRAFICI -->
+  ${DATA.progressi.length >= 2 ? `
+  <div class="grid-2 mb-16">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Peso nel tempo</div>
+      <div class="chart-wrap"><canvas id="chart-peso"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Girovita nel tempo</div>
+      <div class="chart-wrap"><canvas id="chart-girovita"></canvas></div>
+    </div>
+  </div>` : `<div class="card mb-16"><p class="text-muted">Aggiungi almeno 2 misurazioni per vedere i grafici.</p></div>`}
+
+  <!-- TABELLA STORICO -->
+  <div class="card">
+    <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Storico misurazioni</div>
+    ${DATA.progressi.length === 0 ? '<p class="text-muted">Nessuna misurazione ancora.</p>' : `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Data</th><th>Peso</th><th>Girovita</th><th>Passi</th>
+            <th>Umore</th><th>Energia</th><th>Note</th><th>Foto</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${[...DATA.progressi].reverse().map((p,i) => `
+            <tr>
+              <td>${p.data}</td>
+              <td>${p.peso ? p.peso+'kg' : '–'}</td>
+              <td>${p.girovita ? p.girovita+'cm' : '–'}</td>
+              <td>${p.passi || '–'}</td>
+              <td>${p.umore || '–'}</td>
+              <td>${p.energia || '–'}</td>
+              <td>${p.note || '–'}</td>
+              <td>${p.foto || '–'}</td>
+              <td><button class="btn btn-ghost btn-sm" onclick="removeProgressi(${DATA.progressi.length-1-i})">✕</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`}
+  </div>`;
+}
+
+function addProgressi() {
+  const entry = {
+    data: document.getElementById('p-data').value,
+    peso: document.getElementById('p-peso').value,
+    girovita: document.getElementById('p-girovita').value,
+    passi: document.getElementById('p-passi').value,
+    umore: document.getElementById('p-umore').value,
+    energia: document.getElementById('p-energia').value,
+    note: document.getElementById('p-note').value,
+    foto: document.getElementById('p-foto').value
+  };
+  if (!entry.data) { showToast('⚠️ Inserisci almeno la data.'); return; }
+  DATA.progressi.push(entry);
+  saveData();
+  showToast('✅ Misurazione salvata!');
+  renderSection('progressi');
+}
+
+function removeProgressi(idx) {
+  DATA.progressi.splice(idx, 1);
+  saveData();
+  renderSection('progressi');
+}
+
+function renderCharts() {
+  if (DATA.progressi.length < 2) return;
+  const sorted = [...DATA.progressi].sort((a,b) => a.data.localeCompare(b.data));
+  const labels = sorted.map(p => p.data);
+  const pesi = sorted.map(p => parseFloat(p.peso) || null);
+  const giri = sorted.map(p => parseFloat(p.girovita) || null);
+
+  const chartOpts = (label, data, color) => ({
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label,
+        data,
+        borderColor: color,
+        backgroundColor: color + '22',
+        tension: 0.3,
+        fill: true,
+        pointBackgroundColor: color,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#2e3a52' } },
+        y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#2e3a52' } }
+      }
+    }
+  });
+
+  const cp = document.getElementById('chart-peso');
+  const cg = document.getElementById('chart-girovita');
+  if (cp) new Chart(cp, chartOpts('Peso (kg)', pesi, '#4f8ef7'));
+  if (cg) new Chart(cg, chartOpts('Girovita (cm)', giri, '#f472b6'));
+}
+
+// ============================================================
+// SALUTE
+// ============================================================
+function renderSalute() {
+  return `
+  <div class="section-header">
+    <h2>🏥 Salute & Controlli</h2>
+    <p>Tieni traccia di visite mediche e controlli periodici</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+    ${DATA.salute.map((item, i) => `
+      <div class="health-item">
+        <h3>
+          ${item.icon} ${item.nome}
+          <span class="badge ${item.fatto ? 'badge-green' : 'badge-warn'}" style="margin-left:auto">
+            ${item.fatto ? '✅ Fatto' : '⏳ Da fare'}
+          </span>
+        </h3>
+        <div class="health-dates">
+          <div class="form-group" style="margin:0">
+            <label>Ultimo controllo</label>
+            <input type="date" value="${item.ultimo||''}"
+              onchange="updateSalute(${i},'ultimo',this.value)">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Prossimo controllo</label>
+            <input type="date" value="${item.prossimo||''}"
+              onchange="updateSalute(${i},'prossimo',this.value)">
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Note</label>
+          <input type="text" placeholder="Note, risultati, promemoria..."
+            value="${item.note||''}"
+            onchange="updateSalute(${i},'note',this.value)">
+        </div>
+        <div>
+          <button class="btn ${item.fatto ? 'btn-ghost' : 'btn-success'} btn-sm"
+            onclick="toggleSalute(${i})">
+            ${item.fatto ? '↩️ Segna come da fare' : '✅ Segna come fatto'}
+          </button>
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
+function updateSalute(idx, field, value) {
+  DATA.salute[idx][field] = value;
+  saveData();
+}
+
+function toggleSalute(idx) {
+  DATA.salute[idx].fatto = !DATA.salute[idx].fatto;
+  saveData();
+  renderSection('salute');
+  showToast(DATA.salute[idx].fatto ? '✅ Controllo completato!' : '↩️ Segnato come da fare');
+}
+
+// ============================================================
+// NOTE
+// ============================================================
+function renderNote() {
+  return `
+  <div class="section-header">
+    <h2>📝 Note Personali</h2>
+    <p>Area libera – cambiamenti, dubbi, cose da chiedere al medico</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Le tue note</div>
+    <textarea id="note-area" style="min-height:400px;font-size:0.9rem;line-height:1.6"
+      placeholder="Scrivi qui tutto ciò che vuoi ricordare: cambiamenti nella routine, dubbi, cose da chiedere al medico, idee, osservazioni sulla pelle, progressi notati..."
+      onchange="saveNote(this.value)">${DATA.note||''}</textarea>
+    <div class="btn-row no-print">
+      <button class="btn btn-primary" onclick="saveNote(document.getElementById('note-area').value);showToast('✅ Note salvate!')">💾 Salva note</button>
+    </div>
+  </div>`;
+}
+
+function saveNote(val) {
+  DATA.note = val;
+  saveData();
+}
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportData() {
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `manuale_massimiliano_${todayKey()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('⬇️ Dati esportati!');
+}
+
+function importData() {
+  document.getElementById('import-file').click();
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (confirm('Importare i dati? Sovrascriverà i dati attuali.')) {
+        DATA = imported;
+        saveData();
+        showToast('✅ Dati importati con successo!');
+        renderSection(currentSection);
+      }
+    } catch(err) {
+      showToast('❌ File non valido.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ============================================================
+// AFTER RENDER HOOKS
+// ============================================================
+function afterRender(id) {
+  if (id === 'progressi') {
+    setTimeout(renderCharts, 50);
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  loadData();
+  // Set sidebar date
+  const now = new Date();
+  const dateEl = document.getElementById('sidebarDate');
+  if (dateEl) {
+    dateEl.textContent = now.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long' });
+  }
+  renderSection('dashboard');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+// ============================================================
+// SERVICE WORKER REGISTRATION
+// ============================================================
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
