@@ -1121,6 +1121,20 @@ function renderDashboard() {
             <div><div class="check-label">${item.label}</div></div>
           </div>`).join('')}
       </div>
+      <hr class="divider">
+      <div class="card-title" style="margin-bottom:8px"><span class="dot" style="background:var(--accent)"></span>Extra mattina</div>
+      <div class="checklist" id="skin-extra-matt-list">
+        ${(day.skincare_extra_matt||[]).map((item,i) => `
+          <div class="check-item checked">
+            <div class="check-box" style="background:var(--accent2);border-color:var(--accent2);color:#0f1117">✓</div>
+            <div class="check-label" style="flex:1">${item}</div>
+            <button class="btn btn-ghost btn-sm" style="padding:2px 8px" onclick="event.stopPropagation();removeSkinExtraMatt(${i})">✕</button>
+          </div>`).join('')}
+      </div>
+      <div class="add-item-row no-print" style="margin-top:10px">
+        <input type="text" placeholder="es. Patch occhi, prodotto extra..." id="skin-extra-matt-input" onkeydown="if(event.key==='Enter')addSkinExtraMatt()">
+        <button class="btn btn-primary btn-sm" onclick="addSkinExtraMatt()">+ Aggiungi</button>
+      </div>
     </div>
     <div class="card">
       <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Skincare Sera</div>
@@ -1134,7 +1148,7 @@ function renderDashboard() {
       </div>
       ${skin.extra.length ? `<div class="mt-12">${skin.extra.map(e=>`<div class="badge badge-warn" style="margin:3px 3px 0 0">${e}</div>`).join('')}</div>` : ''}
       <hr class="divider">
-      <div class="card-title" style="margin-bottom:8px"><span class="dot" style="background:var(--accent)"></span>Prodotti extra / variazioni</div>
+      <div class="card-title" style="margin-bottom:8px"><span class="dot" style="background:var(--accent)"></span>Extra sera</div>
       <div class="checklist" id="skin-extra-list">
         ${(day.skincare_extra||[]).map((item,i) => `
           <div class="check-item checked">
@@ -1187,7 +1201,10 @@ function renderDashboard() {
   <!-- NOTE GIORNALIERE -->
   <div class="card mb-16">
     <div class="card-title"><span class="dot"></span>Note del giorno</div>
-    <textarea placeholder="Scrivi qui le note di oggi..." onchange="setDayField('note',this.value)">${day.note||''}</textarea>
+    <textarea id="note-giorno" placeholder="Scrivi qui le note di oggi..." oninput="setDayField('note',this.value)">${day.note||''}</textarea>
+    <div class="btn-row no-print" style="margin-top:10px">
+      <button class="btn btn-ghost btn-sm" onclick="setDayField('note',document.getElementById('note-giorno').value);showToast('✅ Note salvate!')">💾 Salva note</button>
+    </div>
   </div>
 
   <!-- GIORNATA COMPLETATA -->
@@ -1196,6 +1213,35 @@ function renderDashboard() {
       ${day.completed ? '✅ Giornata completata!' : '🎯 Segna giornata completata'}
     </button>
   </div>`;
+}
+
+function addSkinExtraMatt() {
+  const input = document.getElementById('skin-extra-matt-input');
+  const val = input.value.trim();
+  if (!val) return;
+  const day = ensureDay();
+  if (!day.skincare_extra_matt) day.skincare_extra_matt = [];
+  day.skincare_extra_matt.push(val);
+  saveData();
+  input.value = '';
+  const list = document.getElementById('skin-extra-matt-list');
+  if (list) {
+    list.innerHTML = (day.skincare_extra_matt||[]).map((item,i) => `
+      <div class="check-item checked">
+        <div class="check-box" style="background:var(--accent2);border-color:var(--accent2);color:#0f1117">✓</div>
+        <div class="check-label" style="flex:1">${item}</div>
+        <button class="btn btn-ghost btn-sm" style="padding:2px 8px" onclick="event.stopPropagation();removeSkinExtraMatt(${i})">✕</button>
+      </div>`).join('');
+  }
+  showToast(`✅ "${val}" aggiunto alla mattina di oggi`);
+}
+
+function removeSkinExtraMatt(idx) {
+  const day = ensureDay();
+  if (!day.skincare_extra_matt) return;
+  day.skincare_extra_matt.splice(idx, 1);
+  saveData();
+  renderSection('dashboard');
 }
 
 function addSkinExtra() {
