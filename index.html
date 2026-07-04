@@ -692,8 +692,10 @@ function todayKey() {
   return new Date().toISOString().slice(0,10);
 }
 
-function ensureDay() {
-  const k = todayKey();
+let selectedDate = todayKey();
+
+function ensureDay(dateKey) {
+  const k = dateKey || selectedDate;
   if (!DATA.daily[k]) {
     DATA.daily[k] = {
       skincare_mattina: [],
@@ -1059,10 +1061,11 @@ function showToast(msg) {
 // ============================================================
 function renderDashboard() {
   const day = ensureDay();
-  const today = new Date();
-  const dow = today.getDay();
+  const selDate = new Date(selectedDate + 'T12:00:00');
+  const dow = selDate.getDay();
   const skin = CALENDARIO_SKIN[dow];
-  const dateStr = today.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const isToday = selectedDate === todayKey();
+  const dateStr = selDate.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
   // Skincare checklist items
   const mattItems = skin.mattina.map((s,i) => ({id:`sm_${i}`, label: s}));
@@ -1071,8 +1074,20 @@ function renderDashboard() {
 
   return `
   <div class="section-header">
-    <h2>🏠 Dashboard Oggi</h2>
+    <h2>🏠 ${isToday ? 'Dashboard Oggi' : 'Dashboard – ' + selDate.toLocaleDateString('it-IT', {day:'numeric', month:'long'})}</h2>
     <p>${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)}</p>
+  </div>
+
+  <!-- NAVIGAZIONE DATA -->
+  <div class="card mb-16" style="padding:14px 18px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="changeDay(-1)">← Ieri</button>
+      <input type="date" value="${selectedDate}" max="${todayKey()}"
+        style="flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;color:var(--text);padding:7px 12px;font-size:0.88rem"
+        onchange="changeDay(0, this.value)">
+      <button class="btn btn-ghost btn-sm" onclick="changeDay(1)" ${isToday ? 'disabled style="opacity:0.4"' : ''}>→ Domani</button>
+      ${!isToday ? `<button class="btn btn-primary btn-sm" onclick="goToday()">Torna ad oggi</button>` : ''}
+    </div>
   </div>
 
   <!-- STATS ROW -->
@@ -1216,6 +1231,24 @@ function renderDashboard() {
       ${day.completed ? '✅ Giornata completata' : '🎯 Segna come completata'}
     </button>
   </div>`;
+}
+
+function changeDay(delta, dateStr) {
+  if (dateStr) {
+    selectedDate = dateStr;
+  } else {
+    const d = new Date(selectedDate + 'T12:00:00');
+    d.setDate(d.getDate() + delta);
+    const newKey = d.toISOString().slice(0,10);
+    if (newKey > todayKey()) return; // non andare nel futuro
+    selectedDate = newKey;
+  }
+  renderSection('dashboard');
+}
+
+function goToday() {
+  selectedDate = todayKey();
+  renderSection('dashboard');
 }
 
 function setPeso(val) {
